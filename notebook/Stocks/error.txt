@@ -1,0 +1,218 @@
+[1324 rows x 3 columns]Exception in thread resample_df_W:
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/threading.py", line 973, in _bootstrap_inner
+
+    self.run()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/threading.py", line 910, in run
+  File "/Users/karthik-m1/stocks/streamlit-stock-analysis/app/data_processor/stock_data_processor.py", line 154, in resample_df
+    df = df.resample('W').agg(lambda x: x[-1]/x[1] - 1)
+
+  File "/Users/karthik-m1/stocks/streamlit-stock-analysis/setup/venv/lib/python3.9/site-packages/pandas/core/resample.py", line 355, in aggregate
+/Users/karthik-m1/stocks/streamlit-stock-analysis/app/data_processor/stock_data_processor.py:160: RuntimeWarning:
+
+divide by zero encountered in scalar divide
+
+           date      close  percent_change
+0    2017-12-01  13.250000             NaN
+1    2017-12-04  12.850000           -3.02
+2    2017-12-05  12.300000           -4.28
+3    2017-12-06  12.900000            4.88
+4    2017-12-07  13.000000            0.78
+...         ...        ...             ...
+1319 2023-04-06  22.049999            2.80
+1320 2023-04-10  23.150000            4.99
+1321 2023-04-11  25.450001            9.94
+1322 2023-04-12  23.200001           -8.84
+1323 2023-04-13  24.250000            4.53
+
+[1324 rows x 3 columns]
+           date      close  percent_change
+0    2017-12-01  13.250000             NaN
+1    2017-12-04  12.850000           -3.02
+2    2017-12-05  12.300000           -4.28
+3    2017-12-06  12.900000            4.88
+4    2017-12-07  13.000000            0.78
+...         ...        ...             ...
+1319 2023-04-06  22.049999            2.80
+1320 2023-04-10  23.150000            4.99
+1321 2023-04-11  25.450001            9.94
+1322 2023-04-12  23.200001           -8.84
+1323 2023-04-13  24.250000            4.53
+
+[1324 rows x 3 columns]
+/Users/karthik-m1/stocks/streamlit-stock-analysis/app/data_processor/stock_data_processor.py:156: RuntimeWarning:
+
+divide by zero encountered in scalar divide
+
+/Users/karthik-m1/stocks/streamlit-stock-analysis/app/data_processor/stock_data_processor.py:160: RuntimeWarning:
+
+divide by zero encountered in scalar divide
+
+/Users/karthik-m1/stocks/streamlit-stock-analysis/app/data_processor/stock_data_processor.py:156: RuntimeWarning:
+
+divide by zero encountered in scalar divide
+
+/Users/karthik-m1/stocks/streamlit-stock-analysis/app/data_processor/stock_data_processor.py:158: RuntimeWarning:
+
+divide by zero encountered in scalar divide
+
+/Users/karthik-m1/stocks/streamlit-stock-analysis/app/data_processor/stock_data_processor.py:162: RuntimeWarning:
+
+divide by zero encountered in scalar divide
+
+=========karthik freq = Y
+    result = self._groupby_and_aggregate(how, *args, **kwargs)
+=========karthik freq = 2Q
+        date     close  percent_change
+0 2017-12-31 -0.097276           -9.73
+1 2018-12-31  0.021277            2.13
+2 2019-12-31 -0.500000          -50.00
+3 2020-12-31  0.907563           90.76
+4 2021-12-31  0.378855           37.89
+5 2022-12-31 -0.111111          -11.11
+6 2023-12-31  0.409884           40.99
+  File "/Users/karthik-m1/stocks/streamlit-stock-analysis/setup/venv/lib/python3.9/site-packages/pandas/core/resample.py", line 446, in _groupby_and_aggregate
+         date     close  percent_change
+0  2017-12-31 -0.097276           -9.73
+1  2018-06-30  0.136170           13.62
+2  2018-12-31 -0.142857          -14.29
+3  2019-06-30 -0.295833          -29.58
+4  2019-12-31 -0.318182          -31.82
+5  2020-06-30  0.084034
+
+
+
+
+
+function updateEMI() {
+
+  const sheets = getSheets()
+
+  sheets.forEach(function(sheet) {
+    console.log(sheet.getName())
+  })
+
+  var valueDict = {}
+  var matchTextDict = {}
+  var duePaidDict = {}
+
+  sheets.forEach(function(sheet) {
+      valueDict[sheet.getName()] = getValuesForSheet(sheet)
+      matchTextDict[sheet.getName()] = getMatchText(sheet)
+      duePaidDict[sheet.getName()] = getDuePaid(sheet)
+  })
+
+  sheets.forEach(function(sheet) {
+    console.log('update')
+    updateDue(sheet, valueDict, matchTextDict, duePaidDict)
+    console.log('update done')
+    return
+  })
+  
+}
+
+function getValuesForSheet(sheet) {
+  const dataRange = sheet.getRange("A1:A50");
+  const values = dataRange.getValues();
+
+  return values
+}
+
+function getMatchText(sheet) {
+  const matchText = sheet.getRange('Q9').getValue();
+  return matchText
+} 
+
+function getDuePaid(sheet) {
+  const duePaid = sheet.getRange("R9").getValue();
+  return duePaid
+}
+
+function updateDue(sheet, valueDict, matchTextDict, duePaidDict) {
+  var closed = sheet.getRange('S2').getValue();
+  console.log('updateDue')
+
+  if (closed == "CLOSED") {
+    console.log('closed')
+    return
+  }
+
+  const row = findEMIRow(sheet, valueDict, matchTextDict)
+
+  console.log('row = ', row)
+
+  cell = sheet.getRange('I' + row);
+  
+  if (duePaidDict[sheet.getName()] == true) {
+    cell.setValue("YES")
+  } else if (cell.getValue() !== 'CLOSED'){
+    cell.setValue("DUE")
+  }
+}
+
+function getSheets() {
+  var sheets = SpreadsheetApp.getActive().getSheets()
+
+  var filteredSheets = []
+
+  sheets = sheets.filter(sheet => sheet.getName().includes("LOAN-"))
+
+  return sheets
+}
+
+function findEMIRow(sheet, valueDict, matchTextDict) {
+  // const dataRange = sheet.getRange("A1:A30");
+  // const values = dataRange.getValues();
+
+  console.log("findEMIRow - " + sheet.getName())
+  const values = valueDict[sheet.getName()]
+  // const matchText = sheet.getRange('Q9').getValue();
+  const matchText = matchTextDict[sheet.getName()]
+
+  console.log('matchText = ', matchText)
+
+  console.log("findEMIRow done")
+
+  return values.findIndex(row => {return row.toString() == matchText}) + 1
+}
+
+function updatePrinciple() {
+  const sheet = SpreadsheetApp.getActive().getActiveSheet()
+
+  console.log('updatePrinciple = ', sheet.getName())
+
+  var values = sheet.getRange('N13:O23').getValues()
+
+  console.log(values)
+
+  values = values.filter(value => {
+    return ''.concat(value[0]).length > 0
+  })
+
+  console.log(sheet.getName())
+  console.log(values)
+
+  dataRange = sheet.getRange('A:A')
+  var dataValues = dataRange.getValues()
+
+  dataValues = dataValues.filter(value => {
+    return ''.concat(value).length > 0
+  })
+
+  values.forEach(matchText => {
+    console.log('matchtext = ', matchText)
+    row = dataValues.findIndex(row => {
+      console.log(row)
+      return row.toString() == matchText[1].toString()
+    }) + 1
+
+    console.log(row)
+
+    updateCell = sheet.getRange('E' + row)
+    updateCell.setValue(matchText[0])
+  })
+
+
+}
+
+
